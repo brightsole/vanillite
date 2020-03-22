@@ -5,13 +5,13 @@
 ### What is it?
 <details>
   <summary>
-    tl;dr: <TODO>
+    tl;dr: localforage + write cache
   </summary>
   <br />
 
-  A brand new package project! vanillite is a wrapper around `localForage` and seeks to make writes faster by using a memory cache.
+  Vanillite is a wrapper around localforage. It seeks to leave the main-used functionality unused. It, unlike localforage, wants to move **lightning-fast**.
 
-  It's ready for you to add some functionality, and publish it!
+  the default cache option allows for storing 1000 items in memory at a time, always the latest things stored. It also makes writes drop out of time, so you don't have to wait to get your item back. This improves performance **alot**. Against a stubbed lib that is even faster than localforage, it was beating it by about 2->4 orders of magnitude. most "writes" happened in less than 0.5ms.
 
 </details>
 <br/>
@@ -19,7 +19,7 @@
 ### How to use it?
 <details>
   <summary>
-    tl;dr: <TODO><code>`yarn && yarn test`</code>
+    tl;dr: npm i @brightsole/vanillite
   </summary>
   <br />
 
@@ -33,24 +33,10 @@
 <summary>tl;dr: most of it</summary>
 <br />
 
-#### High priority
-
-1. finish off mirroring used `localForage` methods
-    1. iterate
-    1. createInstance
-1. write some tests
-    1. setItem
-    1. setItem for many more items than cached
-    1. getItem before the cache limit
-    1. getItem beyond the cache limit
-    1. get some statistics as to how fast it is using a cache _(after out of the startup phase)_
-1. publish the lib with types for consumption
-
 #### Low priority
-
-1. change all instances of `unknown` to a generic that can be specified at instantiation
-2. test all remaining methods to make sure the cache isn't interfering with localforage use
-3. interact with cache many times very quickly to make sure no duplication or missing data occurs when mutating the cache object and document store simultaneously
+1. add weirdness of instantiation to 100% mirror localforage
+1. test all remaining methods to validate it is compatible with a bare localforage installation
+1. investigate different cache constructions than `last in`
 
 </details>
 <br/>
