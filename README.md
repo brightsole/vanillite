@@ -5,7 +5,7 @@
 ### What is it?
 <details>
   <summary>
-    tl;dr: localforage + write cache
+    <strong>tl;dr:</strong> localforage + write cache
   </summary>
   <br />
 
@@ -19,21 +19,34 @@
 ### How to use it?
 <details>
   <summary>
-    tl;dr: npm i @brightsole/vanillite
+    <strong>tl;dr:</strong> <code>npm i @brightsole/vanillite</code>
   </summary>
   <br />
 
-  <TODO> Start devving after that!
+  import it and use it, just like localforage!
+
+  ```js
+    import Vanillite from '@brightsole/vanillite';
+
+    const fastStore = new Vanillite({ name: 'cards' });
+
+    const item = await fastStore.setItem(nanoId(), { some: 'stuff' });
+
+    const allItemIds = await fastStore.keys();
+  ```
 
 </details>
 <br/>
 
 ### TODO:
 <details>
-<summary>tl;dr: most of it</summary>
+  <summary>
+    <strong>tl;dr:</strong> low importance cleanup
+  </summary>
 <br />
 
 #### Low priority
+1. write more readme on how to set cache settings
 1. add weirdness of instantiation to 100% mirror localforage
 1. test all remaining methods to validate it is compatible with a bare localforage installation
 1. investigate different cache constructions than `last in`
