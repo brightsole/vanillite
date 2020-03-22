@@ -1,28 +1,29 @@
-declare type Cache = {
-    [index: string]: any;
-};
 declare type CacheSettings = {
-    lastPurge: number;
     maxCacheItems: number;
-    maxCacheTimeout: number;
 };
 declare type VanilliteOptions = {
     maxCacheItems?: number;
-    maxCacheTimeout?: number;
 } & LocalForageOptions;
-declare class Vanillite {
+declare class Vanillite<ItemType> {
     store: LocalForage;
-    cache: Cache;
+    cache: {
+        [index: string]: ItemType;
+    };
+    cacheLog: Array<string>;
     cacheSettings: CacheSettings;
     constructor(options: VanilliteOptions);
-    getItem: (key: string) => Promise<unknown>;
-    setItem: (key: string, value: unknown) => Promise<unknown>;
+    getItem: (key: string) => Promise<ItemType>;
+    setItem: (key: string, value: ItemType) => Promise<ItemType>;
     removeItem: (key: string) => Promise<void>;
     clear: () => Promise<void>;
-    length: () => Promise<number>;
     key: (index: number) => Promise<string>;
     keys: () => Promise<string[]>;
-    private storeCacheItem;
-    private stashCache;
+    length: () => Promise<number>;
+    iterate: (iterationFunction: (value: ItemType, key: string, index: number) => void, finalCallback?: () => void) => Promise<void>;
+    createInstance: (options: VanilliteOptions) => Vanillite<unknown>;
+    dropInstance: () => Promise<void>;
+    private storeItem;
+    private downsizeCache;
+    private unloadOldest;
 }
 export default Vanillite;

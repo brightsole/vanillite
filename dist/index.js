@@ -55,6 +55,9 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 exports.__esModule = true;
 var localForage = require("localforage");
+var unique = function (anyArray) {
+    return anyArray.filter(function (value, index, self) { return self.indexOf(value) === index; });
+};
 var Vanillite = /** @class */ (function () {
     function Vanillite(options) {
         var _this = this;
@@ -64,33 +67,19 @@ var Vanillite = /** @class */ (function () {
             return _this.store.getItem(key);
         };
         this.setItem = function (key, value) {
-            _this.cache[key] = value;
-            var atCacheLimit = Object.keys(_this.cache).length === _this.cacheSettings.maxCacheItems;
-            var atCacheTimeLimit = Date.now() >
-                _this.cacheSettings.lastPurge + _this.cacheSettings.maxCacheTimeout;
-            if (atCacheLimit || atCacheTimeLimit)
-                _this.stashCache();
+            _this.storeItem(key, value); // executes nonblocking
             return Promise.resolve(value);
         };
         this.removeItem = function (key) {
             delete _this.cache[key];
+            _this.cacheLog = _this.cacheLog.filter(function (cacheKey) { return cacheKey === key; });
             return _this.store.removeItem(key);
         };
         this.clear = function () {
             _this.cache = {};
+            _this.cacheLog = [];
             return _this.store.clear();
         };
-        this.length = function () { return __awaiter(_this, void 0, void 0, function () {
-            var storeLength;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.store.length()];
-                    case 1:
-                        storeLength = _a.sent();
-                        return [2 /*return*/, storeLength + Object.keys(this.cache).length];
-                }
-            });
-        }); };
         this.key = function (index) { return __awaiter(_this, void 0, void 0, function () {
             var key;
             return __generator(this, function (_a) {
@@ -111,35 +100,95 @@ var Vanillite = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.store.keys()];
                     case 1:
                         storeKeys = _a.sent();
-                        return [2 /*return*/, __spreadArrays(storeKeys, Object.keys(this.cache))];
+                        return [2 /*return*/, unique(__spreadArrays(storeKeys, Object.keys(this.cache)))];
                 }
             });
         }); };
-        this.storeCacheItem = function (key, value) { return __awaiter(_this, void 0, void 0, function () {
+        this.length = function () { return __awaiter(_this, void 0, void 0, function () {
+            var keys;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.store.setItem(key, value)];
+                    case 0: return [4 /*yield*/, this.keys()];
+                    case 1:
+                        keys = _a.sent();
+                        return [2 /*return*/, keys.length];
+                }
+            });
+        }); };
+        this.iterate = function (iterationFunction, finalCallback) {
+            if (finalCallback === void 0) { finalCallback = function () { }; }
+            return __awaiter(_this, void 0, void 0, function () {
+                var cacheKeys, workingIndex;
+                var _this = this;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            cacheKeys = Object.keys(this.cache);
+                            cacheKeys.forEach(function (key, index) {
+                                iterationFunction(_this.cache[key], key, index);
+                            });
+                            workingIndex = cacheKeys.length;
+                            return [4 /*yield*/, this.store.iterate(function (value, key) {
+                                    if (cacheKeys.includes(key))
+                                        return; // FILTER DUPES
+                                    workingIndex += 1;
+                                    iterationFunction(value, key, workingIndex);
+                                })];
+                        case 1:
+                            _a.sent();
+                            return [2 /*return*/, Promise.resolve(finalCallback())];
+                    }
+                });
+            });
+        };
+        this.createInstance = function (options) {
+            return new Vanillite(options);
+        };
+        this.dropInstance = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clear()];
                     case 1:
                         _a.sent();
-                        delete this.cache[key];
+                        return [2 /*return*/, this.store.dropInstance()];
+                }
+            });
+        }); };
+        this.storeItem = function (key, value) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        this.cache[key] = value;
+                        return [4 /*yield*/, this.store.setItem(key, value)];
+                    case 1:
+                        _a.sent();
+                        this.cacheLog.push(key);
+                        this.downsizeCache();
                         return [2 /*return*/];
                 }
             });
         }); };
-        this.stashCache = function () {
-            Promise.all(Object.entries(_this.cache).map(function (_a) {
-                var key = _a[0], value = _a[1];
-                return _this.storeCacheItem(key, value);
-            }));
+        this.downsizeCache = function () {
+            var exceededCache = _this.cacheLog.length - _this.cacheSettings.maxCacheItems;
+            if (exceededCache >= 5)
+                _this.unloadOldest(exceededCache);
+            // this is to reduce the number of calls, cache size should hardly be affected by +5
         };
-        var _a = options.maxCacheItems, maxCacheItems = _a === void 0 ? 1000 : _a, _b = options.maxCacheTimeout, maxCacheTimeout = _b === void 0 ? 1000 : _b, rest = __rest(options, ["maxCacheItems", "maxCacheTimeout"]);
-        this.cacheSettings = {
-            maxCacheItems: maxCacheItems,
-            maxCacheTimeout: maxCacheTimeout,
-            lastPurge: Date.now()
+        this.unloadOldest = function (toUnload) {
+            var oldestIds = _this.cacheLog.slice(0, toUnload);
+            var allowedCache = _this.cacheLog.slice(toUnload);
+            oldestIds.forEach(function (oldItemId) {
+                delete _this.cache[oldItemId];
+            });
+            _this.cacheLog = allowedCache;
         };
+        var _a = options.maxCacheItems, maxCacheItems = _a === void 0 ? 1000 : _a, rest = __rest(options, ["maxCacheItems"]);
         this.store = localForage.createInstance(rest);
         this.cache = {};
+        this.cacheLog = [];
+        this.cacheSettings = {
+            maxCacheItems: maxCacheItems
+        };
     }
     return Vanillite;
 }());
