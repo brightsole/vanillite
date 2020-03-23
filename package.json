@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "lint": "eslint --fix .",
-    "build": "tsc index.ts --outDir dist -d",
+    "build": "tsc -p tsconfig.build.json",
     "precommit": "lint-staged",
     "prepush": "npx ava",
     "test": "npx ava",
