@@ -16,7 +16,7 @@
     "dist/index.d.ts"
   ],
   "scripts": {
-    "lint": "eslint --fix .",
+    "lint": "npx eslint --fix .",
     "build": "tsc -p tsconfig.build.json",
     "precommit": "lint-staged",
     "prepush": "npx ava",

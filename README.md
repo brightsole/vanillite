@@ -19,14 +19,14 @@
 ### How to use it?
 <details>
   <summary>
-    <strong>tl;dr:</strong> <code>npm i @brightsole/vanillite</code>
+    <strong>tl;dr:</strong> <code>npm i vanillite</code>
   </summary>
   <br />
 
   import it and use it, just like localforage!
 
   ```js
-    import Vanillite from '@brightsole/vanillite';
+    import Vanillite from 'vanillite';
 
     const fastStore = new Vanillite({ name: 'cards' });
 
