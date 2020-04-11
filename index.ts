@@ -1,4 +1,4 @@
-import * as localForage from 'localforage';
+import localForage from 'localforage';
 
 const unique = (anyArray: Array<any>) =>
   anyArray.filter((value, index, self) => self.indexOf(value) === index);

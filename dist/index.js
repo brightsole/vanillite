@@ -10,15 +10,11 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const localForage = __importStar(require("localforage"));
+const localforage_1 = __importDefault(require("localforage"));
 const unique = (anyArray) => anyArray.filter((value, index, self) => self.indexOf(value) === index);
 class Vanillite {
     constructor(options) {
@@ -97,7 +93,7 @@ class Vanillite {
             this.cacheLog = allowedCache;
         };
         const { maxCacheItems = 1000 } = options, rest = __rest(options, ["maxCacheItems"]);
-        this.store = localForage.createInstance(rest);
+        this.store = localforage_1.default.createInstance(rest);
         this.cache = {};
         this.cacheLog = [];
         this.cacheSettings = {
